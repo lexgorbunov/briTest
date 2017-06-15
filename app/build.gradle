@@ -21,7 +21,6 @@ android {
 
 
 repositories {
-    maven { url 'https://maven.fabric.io/public' }
     maven { url 'http://repo.brightcove.com/releases' }
 }
 
@@ -31,6 +30,4 @@ dependencies {
 
 
     compile 'com.brightcove.player:exoplayer:4.+'
-
-    compile 'com.squareup.leakcanary:leakcanary-android:+'
 }

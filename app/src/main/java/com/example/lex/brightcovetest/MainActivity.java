@@ -16,7 +16,6 @@ import com.brightcove.player.view.BrightcoveExoPlayerVideoView;
 import com.brightcove.player.view.BrightcovePlayer;
 
 public class MainActivity extends BrightcovePlayer {
-    private Button startBtn;
     private int sizeKnownToken = -1;
 
     @Override
@@ -24,20 +23,20 @@ public class MainActivity extends BrightcovePlayer {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        initPlayer();
-
-        startBtn = (Button) findViewById(R.id.start_btn);
-
-        final ViewGroup.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        startBtn.setOnClickListener(new View.OnClickListener() {
+        brightcoveVideoView = (BrightcoveExoPlayerVideoView) findViewById(R.id.brightcove_video_view);
+        findViewById(R.id.start_btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
                 brightcoveVideoView.clear();
                 brightcoveVideoView.add(Video.createVideo("https://staging-static.life.ru/posts/2017/01/961484/video/71585449ccb21f25ec65047e024da435.mp4", DeliveryType.MP4));
-                unbindEvents();
+                if (sizeKnownToken != -1) {
+                    brightcoveVideoView.getEventEmitter().off(EventType.VIDEO_SIZE_KNOWN, sizeKnownToken);
+                    sizeKnownToken = -1;
+                }
                 sizeKnownToken = brightcoveVideoView.getEventEmitter().once(EventType.VIDEO_SIZE_KNOWN, new EventListener() {
                     @Override
                     public void processEvent(final Event event) {
+                        final ViewGroup.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                         layoutParams.height = brightcoveVideoView.getVideoHeight();
                         brightcoveVideoView.setLayoutParams(layoutParams);
                     }
@@ -45,26 +44,5 @@ public class MainActivity extends BrightcovePlayer {
                 brightcoveVideoView.start();
             }
         });
-    }
-
-    private void initPlayer() {
-        brightcoveVideoView = (BrightcoveExoPlayerVideoView) findViewById(R.id.brightcove_video_view);
-    }
-
-    private void unbindEvents() {
-        if (sizeKnownToken != -1) {
-            brightcoveVideoView.getEventEmitter().off(EventType.VIDEO_SIZE_KNOWN, sizeKnownToken);
-            sizeKnownToken = -1;
-        }
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        unbindEvents();
-        final Analytics analytics = brightcoveVideoView.getAnalytics();
-        analytics.getEventEmitter().off();
-        analytics.removeListeners();
-        brightcoveVideoView.clear();
     }
 }
